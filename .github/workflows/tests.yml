@@ -1,0 +1,24 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Dipendenze
+        run: pip install -r requirements.txt -r requirements-dev.txt pyflakes
+      - name: Controllo statico
+        run: pyflakes $(git ls-files '*.py') edith-setup desktop/edith-waybar.py desktop/island/edith-island
+      - name: Test
+        run: pytest -q

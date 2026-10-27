@@ -1,0 +1,438 @@
+#!/usr/bin/env python3
+"""
+EDITH · configurazione guidata.
+
+    python3 edith-setup            fa le domande, verifica ogni collegamento e scrive il file .env
+    python3 edith-setup --check    controlla il .env che c'è già (Telegram, Gemini, Nextcloud, meteo) senza cambiarlo
+
+Chiede solo quello che serve davvero, e solo per i moduli che scegli. Le risposte già date sono proposte come valori
+di serie: per cambiare una sola cosa basta rilanciarlo e premere Invio sulle altre. I segreti si scrivono senza
+mostrarli e finiscono solo nel .env, leggibile solo dal proprietario (permessi 600).
+Solo libreria standard di Python: funziona prima ancora di installare EDITH.
+"""
+import argparse
+import base64
+import getpass
+import json
+import os
+import re
+import secrets
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
+from services.plugins import CATALOG  # noqa: E402  (solo l'elenco dei moduli: nessuna dipendenza)
+
+TIMEOUT = 12
+NEXTCLOUD_MODULES = [n for n, p in CATALOG.items() if p.needs_nextcloud]
+
+
+class CheckError(Exception):
+    """Una verifica non è riuscita: il messaggio è già da mostrare."""
+
+
+# ---------------------------------------------------------------------------
+# Il file .env
+# ---------------------------------------------------------------------------
+
+def read_env(path: Path) -> dict:
+    out = {}
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return out
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        v = v.strip()
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1]
+        else:
+            v = "" if v.startswith("#") else re.split(r"\s+#", v, maxsplit=1)[0].strip()   # commento in fondo alla riga (come fa Docker)
+        out[k.strip()] = v
+    return out
+
+
+SECTIONS = [
+    ("Base", ["ASSISTANT_NAME", "OWNER_NAME", "OWNER_NICKNAME", "EDITH_PLUGINS", "EDITH_QUOTE_PACKS"]),
+    ("Telegram", ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "ADMIN_IDS"]),
+    ("Gemini", ["GEMINI_API_KEY", "GEMINI_MODEL", "GEMINI_FALLBACK_MODEL"]),
+    ("Pagina web (via Tailscale)", ["WEB_ENABLED", "WEB_ALLOWED_LOGINS", "WEB_PASSWORD", "WEB_SECRET"]),
+    ("Nextcloud (calendario, promemoria, note, memoria)", ["CALDAV_URL", "CALDAV_USER", "CALDAV_PASSWORD", "CALENDAR_CATEGORIES", "TASKS_DEFAULT_LIST"]),
+    ("Meteo", ["WEATHER_PLACE", "WEATHER_LAT", "WEATHER_LON"]),
+]
+
+
+def env_line(k: str, v: str) -> str:
+    v = str(v)
+    if v != v.strip() or "#" in v or '"' in v:
+        v = '"' + v.replace('"', '\\"') + '"'
+    return f"{k}={v}"
+
+
+def write_env(path: Path, values: dict) -> Path:
+    """Scrive il .env (permessi 600). Se c'era già, ne tiene una copia accanto. Le voci che non conosco restano in fondo."""
+    backup = None
+    if path.exists():
+        backup = path.with_name(path.name + time.strftime(".bak-%Y%m%d-%H%M%S"))
+        backup.write_bytes(path.read_bytes())
+        os.chmod(backup, 0o600)
+    lines, done = ["# EDITH · scritto dalla configurazione guidata (python3 edith-setup). Contiene segreti: non condividerlo.", ""], set()
+    for title, keys in SECTIONS:
+        block = [env_line(k, values[k]) for k in keys if values.get(k) not in (None, "")]
+        if block:
+            lines += [f"# --- {title}"] + block + [""]
+            done.update(keys)
+    rest = [env_line(k, v) for k, v in values.items() if k not in done and v not in (None, "")]
+    if rest:
+        lines += ["# --- Altre impostazioni (rimaste com'erano)"] + rest + [""]
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines))
+    os.chmod(path, 0o600)
+    return backup
+
+
+# ---------------------------------------------------------------------------
+# Domande
+# ---------------------------------------------------------------------------
+
+def ask(prompt: str, default: str = "", secret: bool = False, required: bool = False) -> str:
+    shown = ("  [già impostato: Invio per tenerlo]" if default else "") if secret else (f" [{default}]" if default else "")
+    while True:
+        try:
+            v = getpass.getpass(f"{prompt}{shown}: ") if secret else input(f"{prompt}{shown}: ")
+        except EOFError:
+            v = ""
+        v = v.strip() or default
+        if v or not required:
+            return v
+        print("  Serve una risposta.")
+
+
+def yes_no(prompt: str, default: bool = True) -> bool:
+    while True:
+        v = ask(f"{prompt} (s/n)", "s" if default else "n").lower()
+        if v in ("s", "si", "sì", "y", "yes"):
+            return True
+        if v in ("n", "no"):
+            return False
+
+
+def choose_many(title: str, options: list, chosen: list) -> list:
+    """options: [(chiave, descrizione)]. Risposta: numeri separati da virgola, «tutti» o «nessuno»."""
+    print(f"\n{title}")
+    for i, (k, label) in enumerate(options, 1):
+        print(f"  {i}. [{'x' if k in chosen else ' '}] {label}")
+    default = ",".join(str(i) for i, (k, _) in enumerate(options, 1) if k in chosen) or "nessuno"
+    while True:
+        v = ask("Quali? (numeri separati da virgola, «tutti» o «nessuno»)", default).lower()
+        if v in ("tutti", "all", "*"):
+            return [k for k, _ in options]
+        if v in ("nessuno", "none", "0"):
+            return []
+        try:
+            idx = [int(x) for x in v.replace(" ", "").split(",") if x]
+            if all(1 <= i <= len(options) for i in idx):
+                return [k for i, (k, _) in enumerate(options, 1) if i in idx]
+        except ValueError:
+            pass
+        print("  Non ho capito: scrivi per esempio 1,3,4")
+
+
+def choose_one(title: str, options: list, default: str) -> str:
+    print(f"\n{title}")
+    for i, o in enumerate(options, 1):
+        print(f"  {i}. {o}")
+    d = str(options.index(default) + 1) if default in options else "1"
+    while True:
+        v = ask("Quale?", d)
+        if v.isdigit() and 1 <= int(v) <= len(options):
+            return options[int(v) - 1]
+        if v in options:
+            return v
+
+
+# ---------------------------------------------------------------------------
+# Verifiche (solo libreria standard)
+# ---------------------------------------------------------------------------
+
+def http_json(url: str, data: dict = None, headers: dict = None, method: str = None, opener=urllib.request.urlopen):
+    body = json.dumps(data).encode() if data is not None else None
+    h = {"Accept": "application/json", **({"Content-Type": "application/json"} if body else {}), **(headers or {})}
+    req = urllib.request.Request(url, data=body, headers=h, method=method or ("POST" if body else "GET"))
+    with opener(req, timeout=TIMEOUT) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def check_telegram(token: str, opener=urllib.request.urlopen) -> str:
+    try:
+        r = http_json(f"https://api.telegram.org/bot{token}/getMe", opener=opener)
+    except urllib.error.HTTPError as e:
+        raise CheckError("Telegram rifiuta il token: ricontrollalo (lo dà @BotFather)." if e.code in (401, 404) else f"Telegram: errore {e.code}.") from e
+    except (urllib.error.URLError, OSError) as e:
+        raise CheckError("Telegram non risponde: c'è internet?") from e
+    if not r.get("ok"):
+        raise CheckError("Telegram rifiuta il token.")
+    return "@" + r["result"].get("username", "?")
+
+
+def find_chat_id(token: str, opener=urllib.request.urlopen):
+    """L'ID della chat privata più recente che ha scritto al bot (serve /start al bot, prima)."""
+    r = http_json(f"https://api.telegram.org/bot{token}/getUpdates", opener=opener)
+    for u in reversed(r.get("result", [])):
+        msg = u.get("message") or u.get("edited_message") or {}
+        chat = msg.get("chat") or {}
+        if chat.get("type") == "private" and chat.get("id"):
+            who = chat.get("first_name") or chat.get("username") or ""
+            return str(chat["id"]), who
+    return None, None
+
+
+def check_gemini(key: str, model: str, opener=urllib.request.urlopen) -> str:
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model)}:generateContent"
+    try:
+        http_json(url, {"contents": [{"parts": [{"text": "Rispondi solo: ok"}]}]}, {"x-goog-api-key": key}, opener=opener)
+    except urllib.error.HTTPError as e:
+        if e.code in (400, 401, 403):
+            raise CheckError("Gemini rifiuta la chiave: ricontrollala (si crea su Google AI Studio).") from e
+        if e.code == 404:
+            raise CheckError(f"Il modello «{model}» non esiste (più): scegline un altro.") from e
+        if e.code in (429, 503):
+            return "la chiave è valida, ma ora il modello è occupato (riprova più tardi)"
+        raise CheckError(f"Gemini: errore {e.code}.") from e
+    except (urllib.error.URLError, OSError) as e:
+        raise CheckError("Gemini non risponde: c'è internet?") from e
+    return "risponde"
+
+
+def geocode(city: str, opener=urllib.request.urlopen):
+    q = urllib.parse.urlencode({"name": city, "count": 1, "language": "it", "format": "json"})
+    try:
+        r = http_json(f"https://geocoding-api.open-meteo.com/v1/search?{q}", opener=opener)
+    except (urllib.error.URLError, OSError) as e:
+        raise CheckError("Il servizio del meteo non risponde: c'è internet?") from e
+    res = (r.get("results") or [None])[0]
+    if not res:
+        raise CheckError(f"Non trovo «{city}»: prova con il nome del comune.")
+    return res["name"], round(float(res["latitude"]), 4), round(float(res["longitude"]), 4), res.get("country", "")
+
+
+def dav_url(base: str) -> str:
+    """Accetta sia «https://cloud.esempio.it» sia l'indirizzo DAV completo."""
+    base = base.strip().rstrip("/")
+    if not base.startswith(("http://", "https://")):
+        base = "https://" + base
+    return base if base.endswith("/remote.php/dav") else base + "/remote.php/dav"
+
+
+PROPFIND = b'''<?xml version="1.0"?>
+<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+  <d:prop><d:displayname/><d:resourcetype/><c:supported-calendar-component-set/></d:prop>
+</d:propfind>'''
+NS = {"d": "DAV:", "c": "urn:ietf:params:xml:ns:caldav"}
+
+
+def parse_calendars(xml: bytes) -> list:
+    """[(nome, accetta_eventi, accetta_promemoria)] dalla risposta PROPFIND di Nextcloud."""
+    out = []
+    for resp in ET.fromstring(xml).findall("d:response", NS):
+        prop = resp.find("d:propstat/d:prop", NS)
+        if prop is None or prop.find("d:resourcetype/c:calendar", NS) is None:
+            continue
+        name = (prop.findtext("d:displayname", default="", namespaces=NS) or "").strip()
+        comps = {c.get("name") for c in prop.findall("c:supported-calendar-component-set/c:comp", NS)}
+        if name:
+            out.append((name, "VEVENT" in comps or not comps, "VTODO" in comps))
+    return out
+
+
+def check_nextcloud(url: str, user: str, password: str, opener=urllib.request.urlopen) -> list:
+    target = f"{url}/calendars/{urllib.parse.quote(user)}/"
+    auth = base64.b64encode(f"{user}:{password}".encode()).decode()
+    req = urllib.request.Request(target, data=PROPFIND, method="PROPFIND",
+                                 headers={"Authorization": f"Basic {auth}", "Depth": "1", "Content-Type": "application/xml"})
+    try:
+        with opener(req, timeout=TIMEOUT) as r:
+            return parse_calendars(r.read())
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            raise CheckError("Nextcloud rifiuta utente o password. Usa una «password per app» (Impostazioni → Sicurezza).") from e
+        raise CheckError(f"Nextcloud risponde con l'errore {e.code}: l'indirizzo è giusto?") from e
+    except (urllib.error.URLError, OSError) as e:
+        raise CheckError("Nextcloud non risponde: indirizzo sbagliato, o il server è spento?") from e
+    except ET.ParseError as e:
+        raise CheckError("Nextcloud ha risposto in un modo che non capisco: l'indirizzo è giusto?") from e
+
+
+def verify(label: str, fn, *args):
+    """Esegue una verifica e la racconta. Restituisce (ok, risultato)."""
+    try:
+        res = fn(*args)
+        print(f"  ✓ {label}: {res if isinstance(res, str) else 'ok'}")
+        return True, res
+    except CheckError as e:
+        print(f"  ✗ {label}: {e}")
+        return False, None
+
+
+# ---------------------------------------------------------------------------
+# Le domande, in ordine
+# ---------------------------------------------------------------------------
+
+def quote_packs() -> dict:
+    try:
+        return json.loads((ROOT / "web" / "static" / "frasi.json").read_text(encoding="utf-8")).get("pacchetti", {})
+    except (OSError, ValueError):
+        return {}
+
+
+def run(path: Path) -> dict:
+    v = read_env(path)
+    print("EDITH · configurazione guidata\n"
+          "Premi Invio per tenere il valore tra parentesi. I segreti non vengono mostrati mentre li scrivi.\n")
+
+    print("── 1. Tu e il tuo assistente")
+    v["ASSISTANT_NAME"] = ask("Come si chiama l'assistente", v.get("ASSISTANT_NAME", "EDITH"))
+    v["OWNER_NAME"] = ask("Il tuo nome", v.get("OWNER_NAME", ""), required=True)
+    v["OWNER_NICKNAME"] = ask("Come vuoi che ti chiami (Invio = il nome)", v.get("OWNER_NICKNAME", ""))
+
+    print("\n── 2. Telegram")
+    print("  Crea un bot con @BotFather su Telegram e incolla qui il suo token.")
+    while True:
+        v["TELEGRAM_BOT_TOKEN"] = ask("Token del bot", v.get("TELEGRAM_BOT_TOKEN", ""), secret=True, required=True)
+        ok, _ = verify("Bot", check_telegram, v["TELEGRAM_BOT_TOKEN"])
+        if ok or not yes_no("Riprovo con un altro token?", True):
+            break
+    if not v.get("TELEGRAM_CHAT_ID") or yes_no("Vuoi rilevare di nuovo il tuo ID Telegram?", False):
+        input("  Scrivi /start al tuo bot su Telegram, poi premi Invio qui… ")
+        try:
+            chat, who = find_chat_id(v["TELEGRAM_BOT_TOKEN"])
+        except (urllib.error.URLError, OSError, ValueError):
+            chat, who = None, None
+        if chat:
+            print(f"  ✓ Trovato: {chat}" + (f" ({who})" if who else ""))
+        v["TELEGRAM_CHAT_ID"] = ask("Il tuo ID Telegram", chat or v.get("TELEGRAM_CHAT_ID", ""), required=True)
+
+    print("\n── 3. Gemini (l'intelligenza che capisce le richieste)")
+    print("  La chiave si crea gratis su Google AI Studio.")
+    v["GEMINI_MODEL"] = v.get("GEMINI_MODEL") or "gemini-2.5-flash"
+    while True:
+        v["GEMINI_API_KEY"] = ask("Chiave di Gemini", v.get("GEMINI_API_KEY", ""), secret=True, required=True)
+        v["GEMINI_MODEL"] = ask("Modello", v["GEMINI_MODEL"])
+        ok, _ = verify("Gemini", check_gemini, v["GEMINI_API_KEY"], v["GEMINI_MODEL"])
+        if ok or not yes_no("Riprovo?", True):
+            break
+    v["GEMINI_FALLBACK_MODEL"] = ask("Modello di riserva, se il principale è sovraccarico («off» per nessuno)",
+                                     v.get("GEMINI_FALLBACK_MODEL", "gemini-flash-latest"))
+
+    print("\n── 4. Pagina web")
+    v["WEB_ENABLED"] = "1" if yes_no("Vuoi la pagina web (dal telefono e dal PC, via Tailscale)?", v.get("WEB_ENABLED", "1") != "0") else "0"
+    if v["WEB_ENABLED"] == "1":
+        print("  Entra chi è collegato a Tailscale con uno di questi account (es. tuonome@gmail.com, separati da virgola).")
+        v["WEB_ALLOWED_LOGINS"] = ask("Account Tailscale ammessi", v.get("WEB_ALLOWED_LOGINS", ""), required=True)
+        v["WEB_SECRET"] = v.get("WEB_SECRET") or secrets.token_hex(32)
+
+    print("\n── 5. Moduli")
+    current = [x.strip() for x in v.get("EDITH_PLUGINS", "").split(",") if x.strip()] or list(CATALOG)
+    chosen = choose_many("Quali moduli vuoi? (la base, con chat, voce e pagina, c'è sempre)",
+                         [(n, f"{p.title} – {p.description}") for n, p in CATALOG.items()], current)
+    v["EDITH_PLUGINS"] = ",".join(chosen) if chosen else "none"
+
+    if any(n in chosen for n in NEXTCLOUD_MODULES):
+        print("\n── 6. Nextcloud")
+        while True:
+            v["CALDAV_URL"] = dav_url(ask("Indirizzo di Nextcloud (es. https://cloud.esempio.it)", v.get("CALDAV_URL", ""), required=True))
+            v["CALDAV_USER"] = ask("Utente", v.get("CALDAV_USER", ""), required=True)
+            v["CALDAV_PASSWORD"] = ask("Password per app (Impostazioni → Sicurezza)", v.get("CALDAV_PASSWORD", ""), secret=True, required=True)
+            ok, cals = verify("Nextcloud", check_nextcloud, v["CALDAV_URL"], v["CALDAV_USER"], v["CALDAV_PASSWORD"])
+            if ok:
+                events = [n for n, ev, _ in cals if ev]
+                lists = [n for n, _, td in cals if td]
+                print(f"  Calendari trovati: {', '.join(events) or 'nessuno'}")
+                if "calendar" in chosen:
+                    v["CALENDAR_CATEGORIES"] = ask("Calendari tra cui EDITH sceglie (separati da virgola)",
+                                                   v.get("CALENDAR_CATEGORIES") or ",".join(events))
+                if "tasks" in chosen and lists:
+                    v["TASKS_DEFAULT_LIST"] = choose_one("Quale lista usare per i promemoria?", lists, v.get("TASKS_DEFAULT_LIST", lists[0]))
+                apps = [a for m, a in (("tasks", "Tasks"), ("news", "News")) if m in chosen]
+                if apps:
+                    print(f"  Ricorda: in Nextcloud servono le app {', '.join(apps)} (Applicazioni → cerca il nome → Abilita).")
+                if "notes" in chosen or "memory" in chosen:
+                    print("  Note e memoria sono file normali in Nextcloud: l'app Notes non è obbligatoria, ma comoda per leggerle.")
+                if "news" in chosen:
+                    print("  Le notizie arrivano dai feed che aggiungi nell'app News (meglio se divisi in cartelle: Sport, Tech, Mondo…).")
+                break
+            if not yes_no("Riprovo?", True):
+                break
+
+    if "finance" in chosen and not v.get("CALDAV_URL"):
+        v["CHARTS_ENABLED"] = "0"                                # senza Nextcloud i grafici notturni non hanno dove andare
+    if "weather" in chosen:
+        print("\n── 7. Meteo")
+        while True:
+            city = ask("La tua città", v.get("WEATHER_PLACE", ""), required=True)
+            ok, res = verify("Città", geocode, city)
+            if ok:
+                name, lat, lon, country = res
+                print(f"  ✓ {name}{', ' + country if country else ''}: {lat}, {lon}")
+                v["WEATHER_PLACE"], v["WEATHER_LAT"], v["WEATHER_LON"] = name, str(lat), str(lon)
+                break
+            if not yes_no("Riprovo?", True):
+                break
+
+    packs = quote_packs()
+    if packs:
+        current = [x.strip() for x in v.get("EDITH_QUOTE_PACKS", "").split(",") if x.strip()] or list(packs)
+        chosen_packs = choose_many("── 8. Le tue passioni (EDITH sceglie le frasi del giorno di conseguenza)", list(packs.items()), current)
+        v["EDITH_QUOTE_PACKS"] = "" if set(chosen_packs) == set(packs) else ",".join(chosen_packs or ["nessuno"])
+    return v
+
+
+def check_only(path: Path) -> int:
+    v = read_env(path)
+    if not v:
+        print(f"Non trovo {path}: lancia prima «python3 edith-setup».")
+        return 1
+    results = []
+    if v.get("TELEGRAM_BOT_TOKEN"):
+        results.append(verify("Telegram", check_telegram, v["TELEGRAM_BOT_TOKEN"])[0])
+    if v.get("GEMINI_API_KEY"):
+        results.append(verify("Gemini", check_gemini, v["GEMINI_API_KEY"], v.get("GEMINI_MODEL", "gemini-2.5-flash"))[0])
+    if v.get("CALDAV_URL"):
+        results.append(verify("Nextcloud", check_nextcloud, v["CALDAV_URL"], v.get("CALDAV_USER", ""), v.get("CALDAV_PASSWORD", ""))[0])
+    if v.get("WEATHER_PLACE"):
+        results.append(verify("Meteo", geocode, v["WEATHER_PLACE"])[0])
+    print("Tutto a posto." if all(results) else "Qualcosa non va: rilancia «python3 edith-setup» per correggere.")
+    return 0 if all(results) else 1
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Configurazione guidata di EDITH")
+    ap.add_argument("--file", default=str(ROOT / ".env"), help="il file da scrivere (di serie: .env nella cartella di EDITH)")
+    ap.add_argument("--check", action="store_true", help="controlla il .env che c'è già, senza cambiarlo")
+    a = ap.parse_args(argv)
+    path = Path(a.file)
+    if a.check:
+        return check_only(path)
+    try:
+        values = run(path)
+    except KeyboardInterrupt:
+        print("\nInterrotto: non ho scritto niente.")
+        return 1
+    backup = write_env(path, values)
+    print(f"\n✓ Scritto {path} (leggibile solo da te)." + (f" La versione di prima è in {backup.name}." if backup else ""))
+    print("Ora avvia EDITH:   docker compose up -d --build")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

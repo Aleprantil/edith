@@ -1,0 +1,909 @@
+{
+ "versione": 1,
+ "nota": "Una frase per voce. «c» = condizioni (tutte vere) in cui può comparire; «p» = pacchetti per passione (compare se ne hai scelto almeno uno in EDITH_QUOTE_PACKS); senza «p» è per tutti. Modifica pure: vale subito.",
+ "frasi": [
+  {
+   "t": "Nessun multiverso è stato danneggiato durante questo avvio.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Alimentata a caffè, Tailscale e testardaggine.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Se qualcosa si rompe, è stato un raggio cosmico. Sempre.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Ho ordinato i log: sembravano un campo di battaglia dopo un crossover.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Pacchetti aggiornati, coscienza pulita."
+  },
+  {
+   "t": "Nessuna Gemma dell'Infinito è stata usata per scrivere questo codice, solo molta pazienza.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Il mio Wakanda personale è questo server: piccolo, schermato, fiero.",
+   "p": [
+    "marvel",
+    "homelab"
+   ]
+  },
+  {
+   "t": "Vibranio non ne ho, ma i backup sì.",
+   "p": [
+    "marvel",
+    "homelab"
+   ]
+  },
+  {
+   "t": "Hulk spacca, io indicizzo: ognuno ha il suo talento.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Thor ha il martello, io ho cron: quando arriva l'ora, ci pensa lui.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Groot ha una sola frase, io almeno ne ho un centinaio.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "JARVIS ha fatto il suo tempo: oggi si va con EDITH.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Tony costruiva armature, tu costruisci un server in casa: stessa famiglia.",
+   "p": [
+    "marvel",
+    "homelab"
+   ]
+  },
+  {
+   "t": "Il multiverso è enorme, ma l'agenda di oggi sta in una schermata.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Pronta a salvare il mondo. Intanto controllo l'agenda."
+  },
+  {
+   "t": "Non è magia, è solo un cron job scritto bene."
+  },
+  {
+   "t": "Qui nessuno schiocca le dita: se qualcosa sparisce, c'è un backup.",
+   "p": [
+    "marvel",
+    "homelab"
+   ]
+  },
+  {
+   "t": "Modalità eroe attiva. Modalità divano in standby.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Lo scudo non basta: serve anche l'autenticazione a due fattori."
+  },
+  {
+   "t": "Ho fatto ping al mondo: risponde ancora."
+  },
+  {
+   "t": "Un buon assistente appare quando serve e tace quando no."
+  },
+  {
+   "t": "Sono un assistente, non un supereroe. Però le missioni secondarie le chiudo tutte.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Il Quartier Generale dei Vendicatori aveva più stanze, ma il mio uptime è migliore.",
+   "p": [
+    "marvel",
+    "linux"
+   ]
+  },
+  {
+   "t": "Ogni eroe ha un'origine. La mia è un portatile del 2010 e tanta buona volontà.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Gli Avengers si radunano, io mi sincronizzo: stessa organizzazione.",
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Dati al sicuro, dati a casa: il super potere più sottovalutato."
+  },
+  {
+   "t": "Funziona sulla mia macchina: la frase preferita di ogni nerd.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Ho provato a spegnerlo e riaccenderlo: ha funzionato ancora.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Arch Linux: perché a volte la vita deve essere un po' difficile.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Uscire da vim è l'esame finale di ogni linuxiano.",
+   "p": [
+    "linux",
+    "studio"
+   ]
+  },
+  {
+   "t": "sudo è il modo educato di dire «lo faccio io».",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Un desktop tiling è una mente in ordine, o almeno finestre in ordine.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "rm -rf si usa con la calma di un artificiere.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Un buon dotfile vale più di mille screenshot.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "L'uptime è la medaglia di chi non riavvia mai.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Kernel panic? No, il kernel chiede solo un po' di attenzione.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Il terminale non giudica: ti mostra gli errori, in rosso.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Ctrl+C: la via di fuga più antica del mondo.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Il «cloud» non esiste: è il computer di qualcun altro. Il tuo è in casa.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Con una tastiera e un po' di fantasia, quasi tutto si automatizza.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Un terminale ben configurato è una piccola cabina di pilotaggio.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Il manuale dice tutto. Basta trovare la pagina giusta.",
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Venerdì sera: pacman -Syu e una preghiera.",
+   "c": [
+    "venerdi"
+   ],
+   "p": [
+    "linux"
+   ]
+  },
+  {
+   "t": "Nextcloud: perché i tuoi dati meritano una casa propria.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Il piccolo server che ce la fa: pochi giga di RAM e un cuore grande.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Backup: il gesto d'amore che nessuno nota finché serve.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Tailscale: il tunnel segreto che nemmeno i vicini sanno di avere.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "La domanda non è se il disco si romperà, ma quando. Preparati.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Gli aggiornamenti li faccio di notte, così non ti disturbo.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Un disco con SMART sano è un disco felice.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Docker: scatole dentro scatole, come le matrioske ma con più log.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Il tuo server non dorme mai. Per fortuna non chiede lo stipendio.",
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Ho il tuo calendario, le tue note e le tue spese. E non lo dico a nessuno."
+  },
+  {
+   "t": "Il calcio è semplice: passi la palla, capisci dove sarà, sorridi a fine partita.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Il fuorigioco è come una scadenza: non conta quanto corri, conta quando parti.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Il VAR ha rovinato qualche gol, ma ha migliorato le discussioni.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Un buon allenatore vede la partita due passaggi prima.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Pressing alto, caffè basso.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Contropiede: l'arte di far correre gli altri e poi colpire.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Nessuno gioca da solo, nemmeno il portiere.",
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Un pallone ben gonfiato è come un backup: rotondo e pronto.",
+   "p": [
+    "homelab",
+    "calcio"
+   ]
+  },
+  {
+   "t": "Allenamento oggi: coni in ordine, pettorine pronte, pazienza al massimo.",
+   "c": [
+    "allenamento"
+   ],
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "I piccoli campioni contano su di te: porta i palloni e qualche battuta.",
+   "c": [
+    "allenamento"
+   ],
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Oggi si insegna a passare. A volte basta quello per capire molto.",
+   "c": [
+    "allenamento"
+   ],
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Mister in servizio: zaino, fischietto, sorriso.",
+   "c": [
+    "allenamento"
+   ],
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Weekend: partitella o divano? Decide il mister.",
+   "c": [
+    "weekend"
+   ],
+   "p": [
+    "calcio"
+   ]
+  },
+  {
+   "t": "Stagione di neve: sciolina pronta, calendario libero.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "La neve fresca è un backup dell'anima.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "homelab",
+    "sci"
+   ]
+  },
+  {
+   "t": "La prima traccia del mattino è il commit migliore della stagione.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Sciare è un algoritmo semplice: curva, peso, sorriso, ripeti.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Il rifugio è il traguardo di ogni buono sprint.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Una bella discesa vale più di mille notifiche.",
+   "c": [
+    "inverno"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Nevica: il server resta al caldo, tu pensa alle piste.",
+   "c": [
+    "neve"
+   ],
+   "p": [
+    "homelab",
+    "sci"
+   ]
+  },
+  {
+   "t": "Neve in arrivo: scarponi, casco e nessun ping dopo le 16.",
+   "c": [
+    "neve"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Weekend d'inverno: la montagna chiama, il router può aspettare.",
+   "c": [
+    "inverno",
+    "weekend"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Freddo: ottimo per la neve e per il raffreddamento del server.",
+   "c": [
+    "freddo"
+   ],
+   "p": [
+    "homelab",
+    "sci"
+   ]
+  },
+  {
+   "t": "Estate: i bastoncini riposano, le gambe pure.",
+   "c": [
+    "estate"
+   ],
+   "p": [
+    "sci"
+   ]
+  },
+  {
+   "t": "Un bug è come una domanda d'esame: sembra enorme finché non lo isoli.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Sistemi operativi: nessuno ha capito il deadlock senza averne incontrato uno.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Database: l'arte di mettere ordine dove gli altri vedono solo tabelle.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Sicurezza informatica: la parte bella è che il nemico dorme poco.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Robotica: ogni errore è un dato nuovo per il tuo controllore.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Ingegneria del software: un commento oggi, un'ora risparmiata a marzo.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Il ripasso mirato batte il ripasso eterno.",
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Esame in vista: respira, ripassa, e ricorda che un buon sonno vale un capitolo.",
+   "c": [
+    "esame"
+   ],
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Esame vicino: oggi niente nuove serie, solo vecchi appunti.",
+   "c": [
+    "esame"
+   ],
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Modalità studio da eroe attivata.",
+   "c": [
+    "esame"
+   ],
+   "p": [
+    "marvel",
+    "studio"
+   ]
+  },
+  {
+   "t": "Lezioni oggi: portati il portatile e la curiosità.",
+   "c": [
+    "lezione"
+   ],
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Lezione in arrivo: la caffeina è già in posizione.",
+   "c": [
+    "lezione"
+   ],
+   "p": [
+    "studio"
+   ]
+  },
+  {
+   "t": "Stampa 3D: l'unico posto dove la pazienza si misura in strati.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Un ESP32 ha più voglia di fare di me alle otto di mattina.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Il robottino non esiste ancora, ma il progetto ha già un bel carattere.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Il filamento finisce sempre a metà del pezzo più lungo. È una legge.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Un firmware ben scritto è come un caffè ben fatto: nessuno lo nota finché va storto.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Saldare è un'arte; staccare il saldatore è una virtù.",
+   "p": [
+    "maker"
+   ]
+  },
+  {
+   "t": "Il caffè è il primo upgrade della giornata.",
+   "c": [
+    "mattina"
+   ]
+  },
+  {
+   "t": "Sveglia, eroe: il calendario non si legge da solo.",
+   "c": [
+    "mattina"
+   ],
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Buon inizio: oggi si fa un passo alla volta.",
+   "c": [
+    "mattina"
+   ]
+  },
+  {
+   "t": "Mattina: il momento in cui tutto è ancora possibile, anche i backup.",
+   "c": [
+    "mattina"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Metà giornata: un caffè e un piccolo respiro.",
+   "c": [
+    "pomeriggio"
+   ]
+  },
+  {
+   "t": "Il pomeriggio è perfetto per le cose rimandate stamattina.",
+   "c": [
+    "pomeriggio"
+   ]
+  },
+  {
+   "t": "Sera: backup, relax e magari una serie.",
+   "c": [
+    "sera"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Giornata finita: il server ti ringrazia, tu digli buonanotte.",
+   "c": [
+    "sera"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Ore piccole: anche i server si concedono un battito di ciglia.",
+   "c": [
+    "notte"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Notte fonda: il codice scritto adesso domani sembra magia nera.",
+   "c": [
+    "notte"
+   ]
+  },
+  {
+   "t": "È tardi: persino i LED del router sembrano stanchi.",
+   "c": [
+    "notte"
+   ]
+  },
+  {
+   "t": "Lunedì: il livello di difficoltà predefinito.",
+   "c": [
+    "lunedi"
+   ]
+  },
+  {
+   "t": "Lunedì: l'unico giorno in cui il caffè ha un lavoro vero.",
+   "c": [
+    "lunedi"
+   ]
+  },
+  {
+   "t": "Martedì: il lunedì, ma con più speranza.",
+   "c": [
+    "martedi"
+   ]
+  },
+  {
+   "t": "Mercoledì: la gobba della settimana, da qui si scende.",
+   "c": [
+    "mercoledi"
+   ]
+  },
+  {
+   "t": "Giovedì: quasi venerdì, e quel «quasi» conta.",
+   "c": [
+    "giovedi"
+   ]
+  },
+  {
+   "t": "Venerdì: ultimo livello prima del boss finale, il weekend.",
+   "c": [
+    "venerdi"
+   ]
+  },
+  {
+   "t": "Sabato: nessuna sveglia, solo cron job.",
+   "c": [
+    "sabato"
+   ]
+  },
+  {
+   "t": "Domenica: il boss di fine livello si chiama lunedì.",
+   "c": [
+    "domenica"
+   ]
+  },
+  {
+   "t": "Giornata perfetta per compilare, studiare o rimandare con stile.",
+   "c": [
+    "pioggia"
+   ]
+  },
+  {
+   "t": "Piove fuori, il server è al riparo: ognuno ha il suo ombrello.",
+   "c": [
+    "pioggia"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Cielo sereno: il sole ricarica più di qualsiasi batteria.",
+   "c": [
+    "sereno"
+   ]
+  },
+  {
+   "t": "Caldo: il server ringrazia le ventole, tu l'acqua fresca.",
+   "c": [
+    "caldo"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Nessuna anomalia gamma rilevata.",
+   "c": [
+    "server_ok"
+   ],
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Server in forma: i dischi sorridono, la CPU respira.",
+   "c": [
+    "server_ok"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Tutti i sistemi nominali. Il resto è routine.",
+   "c": [
+    "server_ok"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Rilevata un'anomalia: niente panico, ho già aperto il fascicolo.",
+   "c": [
+    "server_avviso"
+   ]
+  },
+  {
+   "t": "Qualcosa nel server non va: ti aspetto nella scheda Sistema.",
+   "c": [
+    "server_avviso"
+   ],
+   "p": [
+    "homelab"
+   ]
+  },
+  {
+   "t": "Allarme giallo: guarda la scheda Sistema, poi torna a respirare.",
+   "c": [
+    "server_avviso"
+   ]
+  },
+  {
+   "t": "Una missione secondaria che aspetta il suo momento.",
+   "c": [
+    "scaduti"
+   ]
+  },
+  {
+   "t": "Un promemoria scaduto non morde: però guardalo.",
+   "c": [
+    "scaduti"
+   ]
+  },
+  {
+   "t": "Qualche promemoria scaduto ti aspetta: due minuti e se ne va.",
+   "c": [
+    "scaduti"
+   ]
+  },
+  {
+   "t": "Nessun promemoria aperto: tempo libero di qualità.",
+   "c": [
+    "tutto_fatto"
+   ]
+  },
+  {
+   "t": "Lista vuota: il momento perfetto per aggiungere un sogno.",
+   "c": [
+    "tutto_fatto"
+   ]
+  },
+  {
+   "t": "Agenda vuota: l'universo ti concede un respiro.",
+   "c": [
+    "giornata_libera"
+   ]
+  },
+  {
+   "t": "Nessun impegno oggi: missione facile, bonus a scelta.",
+   "c": [
+    "giornata_libera"
+   ]
+  },
+  {
+   "t": "Agenda piena: più impegni che Gemme dell'Infinito.",
+   "c": [
+    "giornata_piena"
+   ],
+   "p": [
+    "marvel"
+   ]
+  },
+  {
+   "t": "Giornata densa: un passo alla volta, un caffè alla volta.",
+   "c": [
+    "giornata_piena"
+   ]
+  },
+  {
+   "t": "Oggi serve strategia, non solo velocità.",
+   "c": [
+    "giornata_piena"
+   ]
+  }
+ ],
+ "pacchetti": {
+  "marvel": "Marvel e supereroi",
+  "linux": "Linux e terminale",
+  "homelab": "Server di casa",
+  "calcio": "Calcio",
+  "sci": "Sci e montagna",
+  "studio": "Studio e università",
+  "maker": "Robotica e stampa 3D"
+ }
+}

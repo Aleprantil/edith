@@ -1,0 +1,19 @@
+# Segreti e dati personali: mai su Git
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.sqlite*
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Varie
+.DS_Store
+*.swp

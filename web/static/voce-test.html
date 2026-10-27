@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#070605">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Prova voce</title>
+</head>
+<body class="gate">
+  <main class="gate-box">
+    <h1>Prova voce</h1>
+    <p>Apri questa pagina in una <b>scheda normale del browser</b> (non dall'icona sulla Home), tocca i pulsanti e parla in italiano. Poi mandami una schermata di tutto il risultato.</p>
+    <div id="env" class="card-sub"></div>
+    <div class="p-actions">
+      <button id="t1" class="btn primary" type="button">1 · Prova il riconoscimento</button>
+      <button id="t2" class="btn primary" type="button">2 · Parlo, risponde a voce, riascolta</button>
+    </div>
+    <pre id="log" class="mono" aria-live="polite">Pronto. Tocca un pulsante.
+</pre>
+    <button id="copy" class="btn" type="button">Copia il risultato</button>
+  </main>
+  <script src="/static/voce-test.js"></script>
+</body>
+</html>

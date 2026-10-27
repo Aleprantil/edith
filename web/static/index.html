@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070605">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="{{NAME}}">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="/static/sg-300.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/style.css">
+  <title>{{NAME}}</title>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <div class="layout">
+    <header class="hero">
+      <div class="top">
+        <div class="wm"><i aria-hidden="true"></i><span id="wm">{{NAME}}</span></div>
+        <div class="topright">
+          <span id="status" class="st mono"></span>
+          <button id="btn-tts" class="icon-btn" aria-pressed="false" aria-label="Leggi le risposte a voce" title="Leggi le risposte a voce">🔇</button>
+          <button id="btn-panel" class="icon-btn" aria-label="Aspetto e schede" title="Aspetto e schede">⚙</button>
+          <button id="btn-refresh" class="icon-btn" aria-label="Aggiorna tutto" title="Aggiorna tutto">↻</button>
+        </div>
+      </div>
+
+      <div class="clock">
+        <div id="hello" class="hello mono">&nbsp;</div>
+        <div id="time" class="h" aria-label="Ora">--:--</div>
+        <div class="d"><b id="dateline"></b><span id="sunline"></span></div>
+        <div id="wx3" class="wx3" aria-label="Previsioni dei prossimi giorni"></div>
+        <div id="next" class="next" hidden></div>
+        <button id="quote" class="quote" type="button" hidden aria-label="Un'altra frase"></button>
+      </div>
+
+      <button id="orb" class="orb" aria-label="Parla con {{NAME}}: tocca, parla, tocca ancora per finire"><canvas id="orb-cv" aria-hidden="true"></canvas></button>
+      <p id="hint" class="say mono">TOCCA PER PARLARE</p>
+      <div id="quick" class="quick" aria-label="Richieste rapide"></div>
+      <div class="tools">
+        <button id="btn-kbd" class="tool" type="button" aria-label="Scrivi invece di parlare" title="Scrivi">⌨</button>
+        <button id="btn-intro" class="tool" type="button" aria-label="Presentati" title="Presentati">♪</button>
+        <button id="btn-desk" class="tool" type="button" aria-label="Modalità scrivania" title="Modalità scrivania">☾</button>
+      </div>
+      <section id="answer" class="answer" hidden aria-live="polite"><div id="q" class="q mono"></div><div id="a" class="a"></div></section>
+    </header>
+
+    <main id="cards" class="cards" aria-label="Panoramica"></main>
+  </div>
+
+  <div id="scrim" class="scrim" hidden></div>
+  <form id="gbar" class="gbar" hidden autocomplete="off" role="dialog" aria-label="Scrivi a {{NAME}}">
+    <input id="input" type="text" enterkeyhint="send" placeholder="Scrivi o detta a {{NAME}}…" autocomplete="off" autocapitalize="sentences" maxlength="500" aria-label="Messaggio">
+    <button id="btn-mic" type="button" hidden aria-label="Parla">🎙️</button>
+    <button id="btn-send" type="submit" aria-label="Invia">↑</button>
+  </form>
+
+  <div id="dimmer" class="dimmer" hidden aria-hidden="true"></div>
+  <button id="desk-exit" class="desk-exit" type="button" hidden aria-label="Esci dalla modalità scrivania">×</button>
+  <div id="pscrim" class="scrim" hidden></div>
+  <section id="panel" class="panel" role="dialog" aria-label="Aspetto e schede" hidden></section>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

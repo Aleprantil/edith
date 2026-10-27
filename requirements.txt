@@ -1,0 +1,10 @@
+python-telegram-bot==21.10
+google-generativeai==0.8.3
+caldav==1.4.0
+apscheduler==3.11.0
+python-dotenv==1.0.1
+requests==2.31.0
+matplotlib==3.8.2
+numpy==1.26.3
+starlette==1.7.0
+uvicorn==0.54.0

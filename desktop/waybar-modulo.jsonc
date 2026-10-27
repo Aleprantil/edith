@@ -1,0 +1,16 @@
+// Da aggiungere a ~/.config/waybar/config.jsonc
+// 1) metti "custom/edith" in "modules-center" (o "modules-left"/"modules-right")
+// 2) copia questo blocco tra gli altri moduli
+// (senza l'isola installata: usa "edith-waybar.py --open" e "edith-waybar.py --ask" per clic e clic destro)
+"custom/edith": {
+    "exec": "~/.config/waybar/scripts/edith-waybar.py",
+    "return-type": "json",
+    "interval": 60,
+    "signal": 8,
+    "escape": false,
+    "max-length": 70,
+    "tooltip": true,
+    "on-click": "~/.local/share/edith/island/edith-island toggle",
+    "on-click-right": "~/.local/share/edith/island/edith-island ask",
+    "on-click-middle": "~/.config/waybar/scripts/edith-waybar.py --quote"
+}

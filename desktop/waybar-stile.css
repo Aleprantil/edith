@@ -1,0 +1,18 @@
+/* Da aggiungere in fondo a ~/.config/waybar/style.css: i colori di EDITH (ambra su nero) */
+#custom-edith {
+    padding: 0 12px;
+    color: #f3ede4;
+    font-family: "Space Mono", "JetBrainsMono Nerd Font", monospace;
+}
+#custom-edith.now     { color: #ff9f1c; }                 /* impegno in corso */
+#custom-edith.overdue { color: #ffc46b; }                 /* promemoria scaduti */
+#custom-edith.alert   { color: #ff5d4d; }                 /* il server ha un avviso */
+#custom-edith.offline,
+#custom-edith.auth    { color: #8d8071; }                 /* EDITH non raggiungibile o accesso negato */
+
+tooltip {
+    background: #0c0a08;
+    border: 1px solid rgba(255, 235, 210, 0.13);
+    border-radius: 12px;
+}
+tooltip label { color: #f3ede4; font-family: "Space Mono", monospace; }

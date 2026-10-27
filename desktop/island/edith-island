@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""
+L'isola di EDITH per Hyprland.
+
+    edith-island            apre o chiude l'isola (come «toggle»)
+    edith-island toggle     apre o chiude
+    edith-island show       apre
+    edith-island ask        apre con la casella pronta per scrivere
+    edith-island hide       chiude
+    edith-island refresh    aggiorna la striscia «Adesso»
+    edith-island quit       termina il processo
+    edith-island listen     apre e comincia ad ascoltare (tasto premuto)
+    edith-island stop       smette di ascoltare e manda quello che hai detto (tasto lasciato)
+    edith-island talk       come listen/stop, ma con una pressione per iniziare e una per finire
+
+Se l'isola è già in esecuzione il comando le arriva in pochi millisecondi da un socket privato; altrimenti la avvia.
+Il processo resta in memoria a isola chiusa, così si riapre subito.
+"""
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import edith_core as core  # noqa: E402
+
+LAYER_LIBS = ("/usr/lib/libgtk4-layer-shell.so.0", "/usr/lib/libgtk4-layer-shell.so", "/usr/lib64/libgtk4-layer-shell.so.0",
+              "/usr/lib/x86_64-linux-gnu/libgtk4-layer-shell.so.0", "/usr/local/lib/libgtk4-layer-shell.so.0")
+
+
+def layer_lib():
+    return next((p for p in LAYER_LIBS if os.path.exists(p)), None)
+
+
+def daemon(first):
+    # gtk4-layer-shell va caricata prima di libwayland: con Python si fa con LD_PRELOAD (una volta sola, poi si riparte)
+    lib = layer_lib()
+    if lib and os.environ.get("WAYLAND_DISPLAY") and lib not in os.environ.get("LD_PRELOAD", ""):
+        env = dict(os.environ, LD_PRELOAD=lib + (":" + os.environ["LD_PRELOAD"] if os.environ.get("LD_PRELOAD") else ""))
+        os.execve(sys.executable, [sys.executable, str(Path(__file__).resolve()), "--daemon"] + ([first] if first else []), env)
+    import edith_island_ui as ui
+    return ui.run(first)
+
+
+def spawn(first):
+    core.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    log = core.CACHE_DIR / "island.log"
+    if log.exists() and log.stat().st_size > 512_000:
+        log.write_text("")
+    with open(log, "a", encoding="utf-8") as fh:
+        subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--daemon", first],
+                         stdin=subprocess.DEVNULL, stdout=fh, stderr=fh, start_new_session=True)
+
+
+def main(argv):
+    args = argv[1:]
+    if args and args[0] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0
+    if args and args[0] == "--daemon":
+        return daemon(args[1] if len(args) > 1 and args[1] in core.COMMANDS else None)
+    cmd = args[0] if args else "toggle"
+    if cmd not in core.COMMANDS:
+        print(f"Comando sconosciuto: {cmd}. Usa: {', '.join(core.COMMANDS)}", file=sys.stderr)
+        return 2
+    if core.send_command(cmd):
+        return 0
+    if cmd in ("hide", "quit", "refresh", "stop"):
+        return 0                                         # niente da chiudere, aggiornare o fermare
+    spawn({"toggle": "show", "talk": "listen"}.get(cmd, cmd))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

@@ -1,0 +1,12 @@
+services:
+  edith:
+    build: .
+    container_name: edith
+    restart: unless-stopped
+    network_mode: host                 # la pagina ascolta solo su 127.0.0.1: la espone Tailscale (vedi README)
+    environment:
+      - TZ=${TZ:-Europe/Rome}          # date, «oggi» e orari dei messaggi automatici
+    volumes:
+      - .:/app                         # codice e dati (data/) restano nella cartella del progetto
+    env_file:
+      - .env
